@@ -41,6 +41,7 @@ int out_y;
 int way_count = 0;															//记录通路的数量 
 void creat_maze_random(int maze[SIZE_X_MAX][SIZE_Y_MAX]);								//随机创建迷宫
 void seek_path(int maze[SIZE_X_MAX][SIZE_Y_MAX], int x, int y);							//非递归方式找出路 
+void seek_path_count(int maze[SIZE_X_MAX][SIZE_Y_MAX], int x, int y);
 void print_maze_dynamic(int maze[SIZE_X_MAX][SIZE_Y_MAX], Stack *stack, Stack *step);				    //动态打印迷宫通路
 void print_way(Stack *stack);													//输出迷宫的字符通路 
 void delay(int n);															//延时

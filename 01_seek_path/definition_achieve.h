@@ -114,8 +114,42 @@ void save_path(Stack *stack, FILE *p)
 void creat_maze_random(int maze[SIZE_X_MAX][SIZE_Y_MAX])
 {
 	int i, j;
+	
+	printf("Enter maze row and column. fg:(10, 10)\n");
+	scanf("%d %d", &size_x, &size_y);					//输入迷宫的规模
+	while(is_size_illegal(size_x, size_y))
+	{
+		printf("Enter error! Try again\n");
+		scanf("%d %d", &size_x, &size_y);
+	}
+		
+	printf("Enter maze entrance. fg:(0, 1)\n");
+	scanf("%d %d", &entrance_x, &entrance_y);			//输入迷宫的入口
+	while(is_entrance_illegal(entrance_x, entrance_y))
+	{
+		printf("Enter error! Try again\n");
+		scanf("%d %d", &entrance_x, &entrance_y);
+	}
+
+	printf("Enter maze exit. fg:(8, 9)\n");
+	scanf("%d %d", &out_x, &out_y);					//输入迷宫的出口
+	while(is_exit_illegal(out_x, out_y))			//若无通路或和出口相同则重新输入
+	{
+		printf("Enter error! Try again\n");
+		scanf("%d %d", &out_x, &out_y);
+	}
+
+	printf("\n");
+	printf("size: %d * %d\n", size_x, size_y);				//输出迷宫的大小、入口、出口
+	printf("entrance: %d, %d\n", entrance_x, entrance_y);
+	printf("exit: %d, %d\n", out_x, out_y);
+	printf("\nPress any key to start creating maze......\n");
+
+	getchar();
+	getchar();
+
 	srand((unsigned)time(NULL));
-	for(i=0;i<size_x;i++)
+	for(i=0;i<size_x;i++)			//对迷宫随机赋值
 	{
 		for(j=0;j<size_y;j++)
 			maze[i][j] = rand() % 2;
@@ -135,18 +169,31 @@ void creat_maze_random(int maze[SIZE_X_MAX][SIZE_Y_MAX])
 	maze[entrance_x][entrance_y] = 0;		//入口
 	maze[out_x][out_y] = 0;			//出口
 	
-	printf("Maze creating......\n\n");
-	for(i=0;i<size_x;i++)
+	seek_path_count(maze, entrance_x, entrance_y);	//第一次搜索迷宫通路数量
+	while(way_count == 0)
 	{
-		for(j=0;j<size_y;j++)
+		for(i=1;i<size_x-1;i++)
 		{
-			printf("%-2d", maze[i][j]);
-			delay(100000);
+			for(j=1;j<size_y-1;j++)
+				maze[i][j] = rand() % 2;	//若无通路，重新创建迷宫
 		}
 
+		system("cls");
+		printf("Maze creating......\n\n");
+		for(i=0;i<size_x;i++)
+		{
+			for(j=0;j<size_y;j++)
+			{
+				printf("%-2d", maze[i][j]);
+				delay(100000);
+			}
+
+			printf("\n");
+		}
 		printf("\n");
+
+		seek_path_count(maze, entrance_x, entrance_y);		//再次搜索通路数量
 	}
-	printf("\n");
 }
 
 void print_stack(Stack *stack)
@@ -316,6 +363,8 @@ void seek_path(int maze[SIZE_X_MAX][SIZE_Y_MAX], int x, int y)
 					stack = push(stack, next_x, next_y, dir);
 					print_maze_dynamic(maze, stack, step);	//输出图形通路
 					print_stack(stack);		//输出字符通路
+					printf("\nPress any key to continue......\n");
+					getchar();
 					delay(100000000);
 
 					save_path(stack, p);	//保存路径到文件中
