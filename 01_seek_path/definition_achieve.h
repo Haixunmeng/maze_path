@@ -114,7 +114,13 @@ void save_path(Stack *stack, FILE *p)
 void creat_maze_random(int maze[SIZE_X_MAX][SIZE_Y_MAX])
 {
 	int i, j;
-	
+	FILE *f_maze = fopen("maze.txt", "w");		
+	if(f_maze == NULL)
+	{
+		printf("file not open!\n");
+		exit(0);
+	}
+
 	printf("Enter maze row and column. fg:(10, 10)\n");
 	scanf("%d %d", &size_x, &size_y);					//输入迷宫的规模
 	while(is_size_illegal(size_x, size_y))
@@ -194,6 +200,17 @@ void creat_maze_random(int maze[SIZE_X_MAX][SIZE_Y_MAX])
 
 		seek_path_count(maze, entrance_x, entrance_y);		//再次搜索通路数量
 	}
+
+	for(i=0;i<size_x;++i)
+	{
+		for(j=0;j<size_y;++j)
+		{
+			fprintf(f_maze, "%-2d", maze[i][j]);		//将迷宫保存到文件中
+		}
+		fprintf(f_maze, "\n");
+	}
+
+	fclose(f_maze);
 }
 
 void print_stack(Stack *stack)
