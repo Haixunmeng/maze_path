@@ -155,35 +155,29 @@ void creat_maze_random(int maze[SIZE_X_MAX][SIZE_Y_MAX])
 	getchar();
 
 	srand((unsigned)time(NULL));
-	for(i=0;i<size_x;i++)			//对迷宫随机赋值
-	{
-		for(j=0;j<size_y;j++)
-			maze[i][j] = rand() % 2;
-	}
 	
-	for(i=0;i<size_x;i++)
-	{
-		maze[i][0] = 1;				//左墙
-		maze[i][size_y-1] = 1;		//右墙
-	}
-	for(i=0;i<size_y;i++)
-	{
-		maze[0][i] = 1;				//上墙
-		maze[size_x-1][i] = 1;		//下墙
-	}
-	
-	maze[entrance_x][entrance_y] = 0;		//入口
-	maze[out_x][out_y] = 0;			//出口
-	
-	seek_path_count(maze, entrance_x, entrance_y);	//第一次搜索迷宫通路数量
 	while(way_count == 0)
 	{
-		for(i=1;i<size_x-1;i++)
+		for(i=0;i<size_x;i++)			//对迷宫随机赋值
 		{
-			for(j=1;j<size_y-1;j++)
-				maze[i][j] = rand() % 2;	//若无通路，重新创建迷宫
+			for(j=0;j<size_y;j++)
+				maze[i][j] = rand() % 2;
 		}
-
+	
+		for(i=0;i<size_x;i++)
+		{
+			maze[i][0] = 1;				//左墙
+			maze[i][size_y-1] = 1;		//右墙
+		}
+		for(i=0;i<size_y;i++)
+		{
+			maze[0][i] = 1;				//上墙
+			maze[size_x-1][i] = 1;		//下墙
+		}
+	
+		maze[entrance_x][entrance_y] = 0;		//入口
+		maze[out_x][out_y] = 0;			//出口
+	
 		system("cls");
 		printf("Maze creating......\n\n");
 		for(i=0;i<size_x;i++)
@@ -198,7 +192,7 @@ void creat_maze_random(int maze[SIZE_X_MAX][SIZE_Y_MAX])
 		}
 		printf("\n");
 
-		seek_path_count(maze, entrance_x, entrance_y);		//再次搜索通路数量
+		seek_path_count(maze, entrance_x, entrance_y);		//搜索通路数量
 	}
 
 	for(i=0;i<size_x;++i)
