@@ -5,16 +5,10 @@
 #include <WinCon.h>
 #include "definition.h"
 
-void delay(int n)
+void flush()
 {
-	int m, k;
-	m = n;
-	k = n;
-
-	for(;n>0;n--)
-		for(;m>0;m--)
-			for(;k>0;k--);
-			
+	char c;
+	while((c=getchar())!='\n'&&c!=EOF);
 }
 
 Stack *empty_stack(Stack *stack)
@@ -91,7 +85,7 @@ int is_way(Stack *stack, int x, int y)
 			p = p->next;
 	}
 	
-	return p == NULL ? 0 : p->dir;
+	return p == NULL ? 0 : p->dir;		//如果找到，返回该位置向下一步的前进方向，否则返回0
 }
 
 void save_path(Stack *stack, FILE *p)
@@ -126,6 +120,7 @@ void creat_maze_random(int maze[SIZE_X_MAX][SIZE_Y_MAX])
 	while(is_size_illegal(size_x, size_y))
 	{
 		printf("Enter error! Try again\n");
+		flush();		//清空输入流
 		scanf("%d %d", &size_x, &size_y);
 	}
 		
@@ -134,6 +129,7 @@ void creat_maze_random(int maze[SIZE_X_MAX][SIZE_Y_MAX])
 	while(is_entrance_illegal(entrance_x, entrance_y))
 	{
 		printf("Enter error! Try again\n");
+		flush();
 		scanf("%d %d", &entrance_x, &entrance_y);
 	}
 
@@ -142,6 +138,7 @@ void creat_maze_random(int maze[SIZE_X_MAX][SIZE_Y_MAX])
 	while(is_exit_illegal(out_x, out_y))			//若无通路或和出口相同则重新输入
 	{
 		printf("Enter error! Try again\n");
+		flush();
 		scanf("%d %d", &out_x, &out_y);
 	}
 
@@ -151,7 +148,7 @@ void creat_maze_random(int maze[SIZE_X_MAX][SIZE_Y_MAX])
 	printf("exit: %d, %d\n", out_x, out_y);
 	printf("\nPress any key to start creating maze......\n");
 
-	getchar();
+	flush();
 	getchar();
 
 	srand((unsigned)time(NULL));
@@ -185,7 +182,7 @@ void creat_maze_random(int maze[SIZE_X_MAX][SIZE_Y_MAX])
 			for(j=0;j<size_y;j++)
 			{
 				printf("%-2d", maze[i][j]);
-				delay(100000);
+				Sleep(5);	//延时50毫秒
 			}
 
 			printf("\n");
@@ -223,16 +220,16 @@ void print_maze_dynamic(int maze[SIZE_X_MAX][SIZE_Y_MAX], Stack *stack, Stack *s
 {	
 	int i, j, dir;
 	int start_line;
-	COORD target_pos;
-	CONSOLE_SCREEN_BUFFER_INFO current_pos;	
-	Stack *p = step;
+	COORD target_pos;			//保存光标目标位置
+	CONSOLE_SCREEN_BUFFER_INFO current_pos;		//保存光标当前位置
+	Stack *p = step;		//保存所有走过的位置
 	
 	system("cls");		//清屏
 	printf("第%d条通路\n\n", way_count);
 
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), 
 																&current_pos);		//获取当前光标的位置;
-	start_line = current_pos.dwCursorPosition.Y;		//记录迷宫的第一行
+	start_line = current_pos.dwCursorPosition.Y;		//记录迷宫的第一行所在位置
 
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
 															FOREGROUND_RED);	//红色输出
@@ -240,7 +237,7 @@ void print_maze_dynamic(int maze[SIZE_X_MAX][SIZE_Y_MAX], Stack *stack, Stack *s
 	{
 		for(j=0;j<size_y;++j)
 		{
-			if((dir = is_way(stack, i, j)) != 0)
+			if((dir = is_way(stack, i, j)) != 0)		//位于通路上的0被置1，则输出时输出0
 			{
 				printf("%-2d", 0);
 			}
@@ -258,12 +255,12 @@ void print_maze_dynamic(int maze[SIZE_X_MAX][SIZE_Y_MAX], Stack *stack, Stack *s
 	while(p != NULL)//动态输出走出迷宫的过程
 	{
 		target_pos.X = (p->y)*2; 
-		target_pos.Y = start_line + p->x;
+		target_pos.Y = start_line + p->x;		//根据通路上的点在迷宫中的位置，设置光标
 		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),
-																target_pos);			//光标跳到目标位置
+							   target_pos);			//光标跳到目标位置
 
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 
-																FOREGROUND_GREEN);		//绿色输出通路
+							  FOREGROUND_GREEN);		//绿色输出通路
 		switch(p->dir)//以箭头表示移动方向
 		{
 			case 1:
@@ -280,37 +277,37 @@ void print_maze_dynamic(int maze[SIZE_X_MAX][SIZE_Y_MAX], Stack *stack, Stack *s
 				break;
 			case 5:					//当dir>4,即所有方向都已尝试，无通路，后退一步
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
-																		FOREGROUND_RED);	//红色输出
+									  FOREGROUND_RED);	//红色输出
 				printf("%-2d", 0);
 				break;
 			default:
 				break;
 		} 
 
-		delay(30000000);
-		p = p->front;
+		Sleep(500);		//延时500毫秒
+		p = p->front;	//指针移到下一步
 	}
 
 	target_pos.X = 0;
 	target_pos.Y = start_line + size_x;
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),
-																target_pos);			//光标跳到输出迷宫的末尾
+						   target_pos);			//光标跳到输出迷宫的末尾
 	printf("\n");
 
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 
-							FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);//恢复到白色字体
+					      FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);//恢复到白色字体
 }
 
 void seek_path(int maze[SIZE_X_MAX][SIZE_Y_MAX], int x, int y)
 {
-	Stack last_location;
-	Stack *stack = NULL;
-	Stack *step = NULL;
+	Stack last_location;		//记录上一步的位置
+	Stack *stack = NULL;		//记录通路
+	Stack *step = NULL;		//记录所有走过的位置
 
-	int dir = 1;
+	int dir = 1;		//初始方向为向右
 	int next_x, next_y;
 
-	FILE *p = fopen("path.txt", "w");	//打开文件
+	FILE *p = fopen("path.txt", "w");	//创建文件,保存所有通路
 	if(p == NULL)
 	{
 		printf("File not open\n");
@@ -318,15 +315,15 @@ void seek_path(int maze[SIZE_X_MAX][SIZE_Y_MAX], int x, int y)
 		exit(0);
 	}
 
-	while(!(dir > 4 && x == entrance_x && y == entrance_y))
+	while(!(dir > 4 && x == entrance_x && y == entrance_y))	//当当前位置位于迷宫出口，并且方向dir>4表示没有通路
 	{
 		step = push(step, x, y, dir);	//保存走过的每一步
 
-		if(dir > 4)
+		if(dir > 4)		//当dir>4，表示当前位置走不通，则返回到上一能走通的位置，在上一位置换个方向尝试
 		{
 			if(!is_empty(stack))	
 			{
-				last_location = get_top_elem(stack);
+				last_location = get_top_elem(stack);	//上一能走通的位置存在栈顶
 				stack = pop(stack);
 				x = last_location.x;
 				y = last_location.y;	//后退一步
@@ -337,7 +334,7 @@ void seek_path(int maze[SIZE_X_MAX][SIZE_Y_MAX], int x, int y)
 		}//if
 		else
 		{
-			switch(dir)
+			switch(dir)		//根据dir来选择下一个位置
 			{
 				case 1:
 					next_x = x;
@@ -372,11 +369,11 @@ void seek_path(int maze[SIZE_X_MAX][SIZE_Y_MAX], int x, int y)
 					way_count++;	//如果到达出口，则给通路数量加一
 					step = push(step, next_x, next_y, dir);
 					stack = push(stack, next_x, next_y, dir);
+
 					print_maze_dynamic(maze, stack, step);	//输出图形通路
 					print_stack(stack);		//输出字符通路
 					printf("\nPress any key to continue......\n");
 					getchar();
-					delay(100000000);
 
 					save_path(stack, p);	//保存路径到文件中
 
@@ -399,24 +396,24 @@ void seek_path(int maze[SIZE_X_MAX][SIZE_Y_MAX], int x, int y)
 
 	fclose(p);	//关闭文件
 
-	printf("\nAll path has been found\nPress any key to exit......\n");
+	printf("\nAll path has been found\n");
 }
 
 void seek_path_count(int maze[SIZE_X_MAX][SIZE_Y_MAX], int x, int y)
 {	
-	if(x >= size_x || x < 0 || y >= size_y || y < 0)	
+	if(x >= size_x || x < 0 || y >= size_y || y < 0)	//若果到达边界，返回
 		return;
 		
-	if(maze[x][y] == 1)
+	if(maze[x][y] == 1)	//如果走不通，返回
 		return;	
 
-	if(x == out_x && y == out_y)
+	if(x == out_x && y == out_y)	//如果到达出口，给通路数量加1，然后返回
 	{
 		way_count++;
 		return;
 	}
 	
-	maze[x][y] = 1;
+	maze[x][y] = 1;	//如果能走通则将当前位置的值置1，标志以走过
 
 	seek_path_count(maze, x, y+1);	//right
 	seek_path_count(maze, x+1, y);	//down
@@ -424,12 +421,12 @@ void seek_path_count(int maze[SIZE_X_MAX][SIZE_Y_MAX], int x, int y)
 	seek_path_count(maze, x-1, y);	//up
 		
 		
-	maze[x][y] = 0;
+	maze[x][y] = 0;	
 	
 	return;
 }
 
-int is_size_illegal(int x, int y)
+int is_size_illegal(int x, int y)	//判断输入的迷宫大小是否正确
 {
 	if(x < 0 || x > SIZE_X_MAX-1)
 		return 1;
@@ -440,7 +437,7 @@ int is_size_illegal(int x, int y)
 
 }
 
-int is_entrance_illegal(int x, int y)
+int is_entrance_illegal(int x, int y)	//判断输入的入口是否正确
 {
 	if((x >= 0 && x < size_x) && (y >= 0 && y < size_y))
 	{
@@ -450,6 +447,8 @@ int is_entrance_illegal(int x, int y)
 			{
 				return 0;
 			}
+			else
+				return 1;
 		}
 		else if(y > 0 && y < size_y-1)	//入口在上下两边
 		{
@@ -462,28 +461,25 @@ int is_entrance_illegal(int x, int y)
 		return 1;
 }
 
-int is_exit_illegal(int x, int y)
+int is_exit_illegal(int x, int y)		//判断输入的出口是否正确
 {
 	if(x >= 0 && x < size_x && y >= 0 && y < size_y)
 	{
-		if(x == entrance_x && y == entrance_y)
+		if(x == entrance_x && y == entrance_y)		//与入口是否相同
 			return 1;
 
-		if(x >= 0 && x < size_x && y >= 0 && y < size_y)
-		{
 		if(x > 0 && x < size_x-1)
 		{
 			if(y == 0 || y == size_y-1)	//出口在左右两边
 			{
 				return 0;
 			}
+			else
+				return 1;
 		}
 		else if(y > 0 && y < size_y-1)	//出口在上下两边
 		{
 			return 0;
-		}
-		else
-			return 1;
 		}
 		else
 			return 1;

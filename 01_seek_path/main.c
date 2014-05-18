@@ -2,17 +2,7 @@
 
 int main()
 {
-	int maze[SIZE_X_MAX][SIZE_Y_MAX];/*={
-	{1,0,1,1,1,1,1,1,1,1},
-	{1,0,0,1,0,0,0,1,0,1},
-	{1,0,0,1,1,0,0,1,0,1},
-	{1,0,0,0,0,1,1,0,0,1},
-	{1,0,1,1,1,0,0,0,0,1},
-	{1,0,0,0,1,1,0,0,0,1},
-	{1,0,1,0,0,0,1,0,0,1},
-	{1,0,1,1,1,0,1,1,0,1},
-	{1,1,0,0,0,0,0,0,0,0},
-	{1,1,1,1,1,1,1,1,1,1}};*/
+	int maze[SIZE_X_MAX][SIZE_Y_MAX];
 
 	creat_maze_random(maze);
 
@@ -24,6 +14,7 @@ int main()
 
 	seek_path(maze, entrance_x, entrance_y);
 
+	printf("Press any key to exit......\n");
 	getchar();
 	return 0;
 }
