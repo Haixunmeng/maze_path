@@ -115,41 +115,7 @@ void creat_maze_random(int maze[SIZE_X_MAX][SIZE_Y_MAX])
 		exit(0);
 	}
 
-	printf("Enter maze row and column. fg:(10, 10)\n");
-	scanf("%d %d", &size_x, &size_y);					//输入迷宫的规模
-	while(is_size_illegal(size_x, size_y))
-	{
-		printf("Enter error! Try again\n");
-		flush();		//清空输入流
-		scanf("%d %d", &size_x, &size_y);
-	}
-		
-	printf("Enter maze entrance. fg:(0, 1)\n");
-	scanf("%d %d", &entrance_x, &entrance_y);			//输入迷宫的入口
-	while(is_entrance_illegal(entrance_x, entrance_y))
-	{
-		printf("Enter error! Try again\n");
-		flush();
-		scanf("%d %d", &entrance_x, &entrance_y);
-	}
-
-	printf("Enter maze exit. fg:(8, 9)\n");
-	scanf("%d %d", &out_x, &out_y);					//输入迷宫的出口
-	while(is_exit_illegal(out_x, out_y))			//若无通路或和出口相同则重新输入
-	{
-		printf("Enter error! Try again\n");
-		flush();
-		scanf("%d %d", &out_x, &out_y);
-	}
-
-	printf("\n");
-	printf("size: %d * %d\n", size_x, size_y);				//输出迷宫的大小、入口、出口
-	printf("entrance: %d, %d\n", entrance_x, entrance_y);
-	printf("exit: %d, %d\n", out_x, out_y);
-	printf("\nPress any key to start creating maze......\n");
-
-	flush();
-	getchar();
+	enter_arguments();
 
 	srand((unsigned)time(NULL));
 	
@@ -181,13 +147,23 @@ void creat_maze_random(int maze[SIZE_X_MAX][SIZE_Y_MAX])
 		{
 			for(j=0;j<size_y;j++)
 			{
-				printf("%-2d", maze[i][j]);
+				if(maze[i][j] == 1)
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
+															BACKGROUND_RED);	//红色输出砖块
+				else
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
+															BACKGROUND_GREEN);	//绿色输出通路
+
+				printf("  ");
 				Sleep(5);	//延时50毫秒
 			}
 
 			printf("\n");
 		}
 		printf("\n");
+
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
+															FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE);
 
 		seek_path_count(maze, entrance_x, entrance_y);		//搜索通路数量
 	}
@@ -231,20 +207,28 @@ void print_maze_dynamic(int maze[SIZE_X_MAX][SIZE_Y_MAX], Stack *stack, Stack *s
 																&current_pos);		//获取当前光标的位置;
 	start_line = current_pos.dwCursorPosition.Y;		//记录迷宫的第一行所在位置
 
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
-															FOREGROUND_RED);	//红色输出
 	for(i=0;i<size_x;++i)	//输出迷宫
 	{
 		for(j=0;j<size_y;++j)
 		{
 			if((dir = is_way(stack, i, j)) != 0)		//位于通路上的0被置1，则输出时输出0
 			{
-				printf("%-2d", 0);
+				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
+										BACKGROUND_GREEN);
+			}
+			else if(maze[i][j] == 0)
+			{
+				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
+										BACKGROUND_GREEN);
 			}
 			else
 			{
-				printf("%-2d", maze[i][j]);
+				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
+										BACKGROUND_RED);
 			}
+
+			printf("  ");
+
 		}
 		printf("\n");
 	}
@@ -260,7 +244,7 @@ void print_maze_dynamic(int maze[SIZE_X_MAX][SIZE_Y_MAX], Stack *stack, Stack *s
 							   target_pos);			//光标跳到目标位置
 
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 
-							  FOREGROUND_GREEN);		//绿色输出通路
+							  FOREGROUND_BLUE|FOREGROUND_GREEN|FOREGROUND_RED|BACKGROUND_GREEN);		//绿色输出通路
 		switch(p->dir)//以箭头表示移动方向
 		{
 			case 1:
@@ -277,8 +261,8 @@ void print_maze_dynamic(int maze[SIZE_X_MAX][SIZE_Y_MAX], Stack *stack, Stack *s
 				break;
 			case 5:					//当dir>4,即所有方向都已尝试，无通路，后退一步
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
-									  FOREGROUND_RED);	//红色输出
-				printf("%-2d", 0);
+									  BACKGROUND_GREEN);	
+				printf("  ");
 				break;
 			default:
 				break;
@@ -422,15 +406,15 @@ void seek_path_count(int maze[SIZE_X_MAX][SIZE_Y_MAX], int x, int y)
 		
 		
 	maze[x][y] = 0;	
-	
+		
 	return;
 }
 
 int is_size_illegal(int x, int y)	//判断输入的迷宫大小是否正确
 {
-	if(x < 0 || x > SIZE_X_MAX-1)
+	if(x < 3 || x > SIZE_X_MAX-1)
 		return 1;
-	else if(y < 0 || y > SIZE_Y_MAX-1)
+	else if(y < 3 || y > SIZE_Y_MAX-1)
 		return 1;
 	else
 		return 0;
@@ -486,4 +470,43 @@ int is_exit_illegal(int x, int y)		//判断输入的出口是否正确
 	}
 	else
 		return 1;
+}
+
+void enter_arguments()
+{
+	printf("Enter maze row and column. eg:(10  10)\n");
+	scanf("%d %d", &size_x, &size_y);					//输入迷宫的规模
+	while(is_size_illegal(size_x, size_y))
+	{
+		printf("Enter error! Try again\n");
+		flush();		//清空输入流
+		scanf("%d %d", &size_x, &size_y);
+	}
+		
+	printf("Enter maze entrance. eg:(0  1)\n");
+	scanf("%d %d", &entrance_x, &entrance_y);			//输入迷宫的入口
+	while(is_entrance_illegal(entrance_x, entrance_y))
+	{
+		printf("Enter error! Try again\n");
+		flush();
+		scanf("%d %d", &entrance_x, &entrance_y);
+	}
+
+	printf("Enter maze exit. eg:(8  9)\n");
+	scanf("%d %d", &out_x, &out_y);					//输入迷宫的出口
+	while(is_exit_illegal(out_x, out_y))			//若无通路或和出口相同则重新输入
+	{
+		printf("Enter error! Try again\n");
+		flush();
+		scanf("%d %d", &out_x, &out_y);
+	}
+
+	printf("\n");
+	printf("size: %d * %d\n", size_x, size_y);				//输出迷宫的大小、入口、出口
+	printf("entrance: %d, %d\n", entrance_x, entrance_y);
+	printf("exit: %d, %d\n", out_x, out_y);
+	printf("\nPress any key to start creating maze......\n");
+
+	flush();
+	getchar();
 }

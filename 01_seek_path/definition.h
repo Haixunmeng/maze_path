@@ -68,5 +68,6 @@ void save_path(Stack *stack, FILE *p);		//将路径保存到文件中
 int is_size_illegal(int x, int y);			//判断输入的迷宫大小是否正确
 int is_entrance_illegal(int x, int y);		//判断输入的入口是否正确
 int is_exit_illegal(int x, int y);			//判断输入的出口是否正确
+void enter_arguments();		//输入迷宫的入口，出口，大小
 
 void flush();		//清空输入流
